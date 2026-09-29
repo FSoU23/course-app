@@ -64,7 +64,6 @@ http://localhost:4173. Используйте фактический порт и
 - `frontend/src/App.tsx` — вложенные маршруты.
 - `frontend/src/main.tsx` — единственный BrowserRouter внутри StrictMode.
 - `docs/progress.md` — результаты этапов и проверок.
-- `docs/lab2-defense.md` — сценарий демонстрации и ответы для защиты.
 
 ## Повторение проверки
 
