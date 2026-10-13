@@ -1,14 +1,26 @@
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+import { BookForm } from '../components/BookForm'
+import type { BookDraft } from '../types/book'
 
-export function NewBookPage() {
+const emptyBook: BookDraft = {
+  title: '', author: '', genre: '', description: '', status: 'planned',
+  rating: null, note: '', addedAt: '',
+}
+
+type NewBookPageProps = { onCreate: (draft: BookDraft) => string }
+
+export function NewBookPage({ onCreate }: NewBookPageProps) {
+  const navigate = useNavigate()
+
   return (
     <section className="app-section">
-      <h1>Создание книги</h1>
-      <div className="empty-state">
-        <h2>Место для вашей следующей книги</h2>
-        <p>Форма добавления книги появится в лабораторной работе № 3. Сейчас можно посмотреть демонстрационную коллекцию и подробности каждой книги.</p>
-      </div>
-      <Link to="/books">К списку книг</Link>
+      <Link to="/books">← К списку книг</Link>
+      <h1>Добавить книгу</h1>
+      <p className="page-intro">В каждой книге — новая история. Сохраните ту, которую хочется прочитать.</p>
+      <BookForm initialValues={emptyBook} onSave={(draft) => {
+        const id = onCreate(draft)
+        navigate(`/books/${id}`)
+      }} onCancel={() => navigate('/books')} />
     </section>
   )
 }

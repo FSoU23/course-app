@@ -12,8 +12,9 @@ export function AppLayout() {
           <NavLink to="/books/new">Добавить книгу</NavLink>
         </nav>
       </header>
+      <p className="storage-notice">Изменения хранятся только в памяти открытого приложения. После обновления страницы восстановятся демонстрационные книги.</p>
       <main id="main" tabIndex={-1}><Outlet /></main>
-      <footer className="app-footer">Учебная библиотека · Все книги и заметки вымышлены.</footer>
+      <footer className="app-footer">Личная библиотека · Маленькое место для больших историй.<br />Начальная коллекция содержит вымышленные книги и заметки.</footer>
     </div>
   )
 }

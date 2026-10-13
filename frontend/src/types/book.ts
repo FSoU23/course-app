@@ -13,6 +13,8 @@ export type Book = {
   addedAt: string
 }
 
+export type BookDraft = Omit<Book, 'id'>
+
 export const bookStatusLabels: Record<BookStatus, string> = {
   planned: 'Запланировано',
   reading: 'Читаю',

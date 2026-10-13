@@ -1,9 +1,12 @@
-import { Link, useParams } from 'react-router'
-import { books } from '../data/books'
+import { Link, useNavigate, useParams } from 'react-router'
 import { bookStatusLabels } from '../types/book'
+import type { Book } from '../types/book'
 
-export function BookDetailsPage() {
+type BookDetailsPageProps = { books: Book[]; onDelete: (id: string) => void }
+
+export function BookDetailsPage({ books, onDelete }: BookDetailsPageProps) {
   const { id } = useParams()
+  const navigate = useNavigate()
   const book = books.find((item) => item.id === id)
 
   if (!book) {
@@ -20,7 +23,7 @@ export function BookDetailsPage() {
     <section className="app-section">
       <Link to="/books">← К списку книг</Link>
       <h1>{book.title}</h1>
-      <p className="details-description">{book.description}</p>
+      <p className="details-description">{book.description || 'Описание пока не добавлено.'}</p>
       <dl className="book-details">
         <div><dt>Автор</dt><dd>{book.author}</dd></div>
         <div><dt>Жанр</dt><dd>{book.genre}</dd></div>
@@ -29,7 +32,16 @@ export function BookDetailsPage() {
         <div><dt>Дата добавления</dt><dd><time dateTime={book.addedAt}>{book.addedAt.split('-').reverse().join('.')}</time></dd></div>
       </dl>
       <h2>Личная заметка</h2>
-      <p className="note">{book.note}</p>
+      <p className="note">{book.note || 'Здесь появятся ваши впечатления о книге.'}</p>
+      <div className="page-actions">
+        <Link className="button-link" to={`/books/${book.id}/edit`}>Редактировать</Link>
+        <button type="button" className="button-danger" onClick={() => {
+          if (window.confirm(`Удалить книгу «${book.title}»?`)) {
+            onDelete(book.id)
+            navigate('/books', { replace: true })
+          }
+        }}>Удалить книгу</button>
+      </div>
     </section>
   )
 }
