@@ -5,7 +5,7 @@ export type Book = {
   id: string
   title: string
   author: string
-  genre: string
+  genre: string // Постоянный id из HTTP-справочника жанров, а не отображаемое имя.
   description: string
   status: BookStatus
   rating: BookRating | null

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { BookCard } from '../components/BookCard'
+import { useGenres } from '../hooks/useGenres'
 import { bookStatusLabels } from '../types/book'
 import type { Book, BookStatus } from '../types/book'
 
@@ -8,6 +9,8 @@ type BooksPageProps = { books: Book[] }
 
 export function BooksPage({ books }: BooksPageProps) {
   const [status, setStatus] = useState<BookStatus | 'all'>('all')
+  const { load } = useGenres()
+  const genres = load.status === 'success' ? load.data : []
   const visibleBooks = books.filter((book) => status === 'all' || book.status === status)
 
   return (
@@ -40,7 +43,8 @@ export function BooksPage({ books }: BooksPageProps) {
         <div className="empty-state"><h2>Нет книг с таким статусом</h2><p>Выберите другой статус или сбросьте фильтр, чтобы увидеть всю коллекцию.</p></div>
       ) : (
         <div className="book-list">
-          {visibleBooks.map((book) => <BookCard key={book.id} book={book} />)}
+          {visibleBooks.map((book) => <BookCard key={book.id} book={book}
+            genreName={genres.find((genre) => genre.id === book.genre)?.name} />)}
         </div>
       )}
     </section>

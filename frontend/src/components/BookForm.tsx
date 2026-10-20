@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { SubmitEvent } from 'react'
+import { useGenres } from '../hooks/useGenres'
 import { bookStatusLabels } from '../types/book'
 import type { BookDraft, BookRating } from '../types/book'
 
@@ -23,14 +24,27 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
   }))
   const [errors, setErrors] = useState<FormErrors>({})
   const ratingInput = useRef<HTMLInputElement>(null)
+  const { load, retry } = useGenres()
+  const genres = load.status === 'success' ? load.data : []
+  const selectedGenreExists = genres.some((genre) => genre.id === draft.genre)
+  const canSave = load.status === 'success' && selectedGenreExists
+  const unknownGenre = load.status === 'success' && genres.length > 0 &&
+    draft.genre !== '' && !selectedGenreExists
 
   function changeField<K extends keyof FormDraft>(field: K, value: FormDraft[K]) {
     setDraft((current) => ({ ...current, [field]: value }))
     setErrors((current) => ({ ...current, [field]: undefined }))
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
+    // Проверка обязательна и здесь: disabled защищает только нажатие кнопки.
+    if (!canSave) {
+      setErrors((current) => ({
+        ...current, genre: 'Дождитесь загрузки справочника и выберите доступный жанр.',
+      }))
+      return
+    }
     const nextErrors: FormErrors = {}
     const title = draft.title.trim()
     const author = draft.author.trim()
@@ -58,7 +72,7 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
     }
 
     onSave({
-      ...draft, title, author, genre: draft.genre.trim(),
+      ...draft, title, author,
       description: draft.description.trim(), note: draft.note.trim(), rating,
     })
   }
@@ -80,8 +94,38 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
           <span id="author-error" className="field-error">{errors.author}</span>
         </div>
         <div className="form-field">
-          <label htmlFor="book-genre">Жанр</label>
-          <input id="book-genre" value={draft.genre} onChange={(event) => changeField('genre', event.target.value)} />
+          <label htmlFor="book-genre">Жанр *</label>
+          <select id="book-genre" name="book-genre" value={draft.genre} required
+            disabled={load.status !== 'success' || genres.length === 0}
+            aria-invalid={Boolean(errors.genre) || unknownGenre}
+            aria-describedby="genre-hint genre-state genre-error"
+            onChange={(event) => changeField('genre', event.target.value)}>
+            <option value="">Выберите жанр</option>
+            {draft.genre !== '' && !selectedGenreExists && (
+              <option value={draft.genre} disabled>Текущий код: {draft.genre} — выберите доступный жанр</option>
+            )}
+            {genres.map((genre) => <option key={genre.id} value={genre.id}>{genre.name}</option>)}
+          </select>
+          <span id="genre-hint" className="field-hint">Выберите жанр из справочника, чтобы сохранить книгу.</span>
+          <div id="genre-state" className="genre-state">
+            {load.status === 'loading' && <p role="status">Загружаем жанры…</p>}
+            {load.status === 'error' && (
+              <div className="reference-message reference-message-error">
+                <p role="alert">{load.message}</p>
+                <button type="button" className="button-secondary" onClick={retry}>Повторить</button>
+              </div>
+            )}
+            {load.status === 'success' && genres.length === 0 && (
+              <div className="reference-message">
+                <p role="status">Жанров пока нет. Сохранение недоступно.</p>
+                <button type="button" className="button-secondary" onClick={retry}>Повторить</button>
+              </div>
+            )}
+            {unknownGenre && (
+              <p className="field-error" role="alert">Прежнего жанра нет в справочнике. Выберите доступный вариант; остальные поля сохранены.</p>
+            )}
+          </div>
+          <span id="genre-error" className="field-error">{errors.genre}</span>
         </div>
         <div className="form-field form-field-wide">
           <label htmlFor="book-description">Описание</label>
@@ -115,7 +159,7 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
         </div>
       </div>
       <div className="form-actions">
-        <button type="submit">Сохранить книгу</button>
+        <button type="submit" disabled={!canSave}>Сохранить книгу</button>
         <button type="button" className="button-secondary" onClick={onCancel}>Отмена</button>
       </div>
     </form>

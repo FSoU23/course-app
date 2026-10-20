@@ -1,0 +1,9 @@
+[
+  { "id": "science-fiction", "name": "Научная фантастика" },
+  { "id": "adventure", "name": "Приключения" },
+  { "id": "fantasy", "name": "Фэнтези" },
+  { "id": "detective", "name": "Детектив" },
+  { "id": "nonfiction", "name": "Познавательная проза" },
+  { "id": "novel", "name": "Роман" },
+  { "id": "poetry", "name": "Поэзия" }
+]

@@ -66,6 +66,13 @@ input:focus, select:focus, textarea:focus { background: #fff; }
 .field-hint { color: var(--muted); font-size: .85rem; }
 .field-error { color: #a02b4f; font-size: .9rem; font-weight: 600; }
 .field-error:empty { display: none; }
+.genre-state:empty { display: none; }
+.genre-state p { margin: 0; }
+.genre-state { color: var(--muted); font-size: .9rem; }
+.reference-message { padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--rose-50); }
+.reference-message button { margin-top: 12px; }
+.reference-message-error { border-color: #d88ca4; color: #85213f; background: #ffe9ef; }
+select:disabled { cursor: not-allowed; color: var(--muted); background: var(--rose-100); }
 .form-error-summary { padding: 14px 18px; margin: 0 0 24px; border: 1px solid #d88ca4; border-radius: 12px; color: #85213f; background: #ffe9ef; }
 .form-actions { padding-top: 24px; border-top: 1px solid var(--rose-100); }
 .app-footer { margin-top: 40px; padding: 20px 4px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
