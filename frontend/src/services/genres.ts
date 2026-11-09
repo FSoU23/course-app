@@ -1,4 +1,5 @@
-import type { Genre } from '../types/genre'
+  import type { Genre } from '../types/genre'
+import { getSupabase } from '../lib/supabase'
 
 function isGenre(value: unknown): value is Genre {
   if (typeof value !== 'object' || value === null) return false
@@ -22,19 +23,13 @@ export function parseGenres(value: unknown): Genre[] {
   return genres
 }
 
-const genresUrl = `${import.meta.env.BASE_URL}demo/genres.json`
-
 export async function getGenres(signal: AbortSignal): Promise<Genre[]> {
-  const response = await fetch(genresUrl, { signal, cache: 'no-store' })
-  if (!response.ok) {
-    throw new Error(`Не удалось загрузить жанры: HTTP ${response.status}.`)
-  }
-  let value: unknown
-  try {
-    value = await response.json()
-  } catch (error: unknown) {
-    if (signal.aborted) throw error
-    throw new Error('Справочник жанров содержит некорректный JSON.')
-  }
-  return parseGenres(value)
+  const { data, error } = await getSupabase()
+    .from('genres')
+    .select('id, name')
+    .order('name')
+    .abortSignal(signal)
+  if (signal.aborted) throw new DOMException('Запрос отменён', 'AbortError')
+  if (error) throw new Error(`Не удалось загрузить жанры: ${error.message}`)
+  return parseGenres(data)
 }

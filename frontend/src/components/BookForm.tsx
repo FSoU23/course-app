@@ -124,6 +124,9 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
             {unknownGenre && (
               <p className="field-error" role="alert">Прежнего жанра нет в справочнике. Выберите доступный вариант; остальные поля сохранены.</p>
             )}
+            {load.status === 'success' && genres.length > 0 && (
+              <button type="button" className="button-secondary" onClick={retry}>Обновить справочник</button>
+            )}
           </div>
           <span id="genre-error" className="field-error">{errors.genre}</span>
         </div>
