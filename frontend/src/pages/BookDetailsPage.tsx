@@ -1,13 +1,17 @@
 import { Link, useNavigate, useParams } from 'react-router'
+import { useRef, useState } from 'react'
 import { bookStatusLabels } from '../types/book'
 import type { Book } from '../types/book'
 import { useGenres } from '../hooks/useGenres'
 
-type BookDetailsPageProps = { books: Book[]; onDelete: (id: string) => void }
+type BookDetailsPageProps = { books: Book[]; onDelete: (id: string) => Promise<void> }
 
 export function BookDetailsPage({ books, onDelete }: BookDetailsPageProps) {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState('')
+  const busy = useRef(false)
   const { load } = useGenres()
   const book = books.find((item) => item.id === id)
   const genres = load.status === 'success' ? load.data : []
@@ -39,13 +43,17 @@ export function BookDetailsPage({ books, onDelete }: BookDetailsPageProps) {
       <p className="note">{book.note || 'Здесь появятся ваши впечатления о книге.'}</p>
       <div className="page-actions">
         <Link className="button-link" to={`/books/${book.id}/edit`}>Редактировать</Link>
-        <button type="button" className="button-danger" onClick={() => {
-          if (window.confirm(`Удалить книгу «${book.title}»?`)) {
-            onDelete(book.id)
+        <button type="button" className="button-danger" disabled={pending} onClick={async () => {
+          if (busy.current || !window.confirm(`Удалить книгу «${book.title}»?`)) return
+          busy.current = true; setPending(true); setError('')
+          try {
+            await onDelete(book.id)
             navigate('/books', { replace: true })
-          }
-        }}>Удалить книгу</button>
+          } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Не удалось удалить книгу.') }
+          finally { busy.current = false; setPending(false) }
+        }}>{pending ? 'Удаляем…' : 'Удалить книгу'}</button>
       </div>
+      {error && <p role="alert" className="form-error-summary">{error}</p>}
     </section>
   )
 }

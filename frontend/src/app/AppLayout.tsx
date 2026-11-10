@@ -1,6 +1,21 @@
 import { NavLink, Outlet } from 'react-router'
+import { useRef, useState } from 'react'
+import type { AuthState } from '../hooks/useAuth'
+import { getSupabase } from '../lib/supabase'
 
-export function AppLayout() {
+export function AppLayout({ auth }: { auth: AuthState }) {
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState('')
+  const busy = useRef(false)
+  async function signOut() {
+    if (busy.current) return
+    busy.current = true; setPending(true); setError('')
+    try {
+      const { error } = await getSupabase().auth.signOut({ scope: 'local' })
+      if (error) throw error
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Не удалось выйти.') }
+    finally { busy.current = false; setPending(false) }
+  }
   return (
     <div className="app">
       <a className="skip-link" href="#main">К содержимому</a>
@@ -11,10 +26,15 @@ export function AppLayout() {
           <NavLink to="/books" end>Моя коллекция</NavLink>
           <NavLink to="/books/new">Добавить книгу</NavLink>
         </nav>
+        {auth.status === 'authenticated' && <div className="account-bar">
+          <span>{auth.session.user.email}</span>
+          <button disabled={pending} className="button-secondary" onClick={() => void signOut()}>{pending ? 'Выходим…' : 'Выйти'}</button>
+        </div>}
+        {error && <p role="alert">{error}</p>}
       </header>
-      <p className="storage-notice">Изменения хранятся только в памяти открытого приложения. После обновления страницы восстановятся демонстрационные книги.</p>
+      {auth.status === 'authenticated' && <p className="storage-notice">Книги сохраняются в вашей личной коллекции и доступны после повторного входа.</p>}
       <main id="main" tabIndex={-1}><Outlet /></main>
-      <footer className="app-footer">Личная библиотека · Маленькое место для больших историй.<br />Начальная коллекция содержит вымышленные книги и заметки.</footer>
+      <footer className="app-footer">Личная библиотека · Маленькое место для больших историй.</footer>
     </div>
   )
 }

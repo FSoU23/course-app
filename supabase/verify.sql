@@ -13,10 +13,20 @@ begin
     or not has_table_privilege('authenticated', 'public.genres', 'SELECT') then
     raise exception 'Не разрешено чтение справочника';
   end if;
-  if has_table_privilege('anon', 'public.genres', 'INSERT,UPDATE,DELETE')
-    or has_table_privilege('authenticated', 'public.genres', 'INSERT,UPDATE,DELETE')
-    or has_table_privilege('anon', 'public.books', 'SELECT,INSERT,UPDATE,DELETE')
-    or has_table_privilege('authenticated', 'public.books', 'SELECT,INSERT,UPDATE,DELETE') then
+  if has_table_privilege('anon', 'public.genres', 'INSERT')
+    or has_table_privilege('anon', 'public.genres', 'UPDATE')
+    or has_table_privilege('anon', 'public.genres', 'DELETE')
+    or has_table_privilege('authenticated', 'public.genres', 'INSERT')
+    or has_table_privilege('authenticated', 'public.genres', 'UPDATE')
+    or has_table_privilege('authenticated', 'public.genres', 'DELETE')
+    or has_table_privilege('anon', 'public.books', 'SELECT')
+    or has_table_privilege('anon', 'public.books', 'INSERT')
+    or has_table_privilege('anon', 'public.books', 'UPDATE')
+    or has_table_privilege('anon', 'public.books', 'DELETE')
+    or has_table_privilege('authenticated', 'public.books', 'SELECT')
+    or has_table_privilege('authenticated', 'public.books', 'INSERT')
+    or has_table_privilege('authenticated', 'public.books', 'UPDATE')
+    or has_table_privilege('authenticated', 'public.books', 'DELETE') then
     raise exception 'Лишние клиентские права';
   end if;
 

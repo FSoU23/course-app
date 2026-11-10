@@ -1,6 +1,15 @@
 # Личная библиотека — книги, статусы чтения и заметки
 
-## Текущий этап — ЛР 5
+## Текущий этап — ЛР 6
+
+Вход/регистрация: `/auth`. Книги сохраняются в Supabase и доступны только владельцу.
+После настройки ЛР 5 примените миграцию `20261109192250_books_owner_policies.sql`.
+Site URL и Redirect URL в Supabase: `http://localhost:5173`, подтверждение email включено.
+Запуск: `npm ci`, `npm run dev -- --host localhost --port 5173 --strictPort`.
+Проверка: `npm run lint`, `npm run build`, `npm run preview`.
+Инструкции и сценарий двух аккаунтов: [ЛР 6](../docs/lab6-defense.md).
+
+## Предыдущий этап — ЛР 5
 
 Жанры приходят из Supabase. Перед запуском создайте `.env.local` по `.env.example`,
 укажите Project URL и Publishable key, затем перезапустите Vite.

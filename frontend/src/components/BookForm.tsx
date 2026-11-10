@@ -6,7 +6,7 @@ import type { BookDraft, BookRating } from '../types/book'
 
 type BookFormProps = {
   initialValues: BookDraft
-  onSave: (draft: BookDraft) => void
+  onSave: (draft: BookDraft) => Promise<void>
   onCancel: () => void
 }
 
@@ -23,6 +23,9 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
     ...initialValues, rating: initialValues.rating === null ? '' : String(initialValues.rating),
   }))
   const [errors, setErrors] = useState<FormErrors>({})
+  const [pending, setPending] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const busy = useRef(false)
   const ratingInput = useRef<HTMLInputElement>(null)
   const { load, retry } = useGenres()
   const genres = load.status === 'success' ? load.data : []
@@ -36,8 +39,10 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
     setErrors((current) => ({ ...current, [field]: undefined }))
   }
 
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (busy.current) return
+    setSubmitError('')
     // Проверка обязательна и здесь: disabled защищает только нажатие кнопки.
     if (!canSave) {
       setErrors((current) => ({
@@ -71,15 +76,21 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
       return
     }
 
-    onSave({
+    busy.current = true
+    setPending(true)
+    try { await onSave({
       ...draft, title, author,
       description: draft.description.trim(), note: draft.note.trim(), rating,
-    })
+    }) } catch (error: unknown) {
+      setSubmitError(error instanceof Error ? error.message : 'Не удалось сохранить книгу.')
+    } finally { busy.current = false; setPending(false) }
   }
 
   return (
     <form className="book-form" onSubmit={handleSubmit} noValidate>
       <p className="form-hint">* Обязательные поля. Остальное можно заполнить позже.</p>
+      {submitError && <p className="form-error-summary" role="alert">{submitError} Введённые данные сохранены в форме.</p>}
+      <fieldset className="form-fields" disabled={pending}>
       {Object.values(errors).some(Boolean) && <p className="form-error-summary" role="alert">Книга не сохранена. Исправьте отмеченные поля — введённые данные остались в форме.</p>}
       <div className="form-grid">
         <div className="form-field form-field-wide">
@@ -162,9 +173,10 @@ export function BookForm({ initialValues, onSave, onCancel }: BookFormProps) {
         </div>
       </div>
       <div className="form-actions">
-        <button type="submit" disabled={!canSave}>Сохранить книгу</button>
+        <button type="submit" disabled={!canSave || pending}>{pending ? 'Сохраняем…' : 'Сохранить книгу'}</button>
         <button type="button" className="button-secondary" onClick={onCancel}>Отмена</button>
       </div>
+      </fieldset>
     </form>
   )
 }

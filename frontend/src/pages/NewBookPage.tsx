@@ -7,7 +7,7 @@ const emptyBook: BookDraft = {
   rating: null, note: '', addedAt: '',
 }
 
-type NewBookPageProps = { onCreate: (draft: BookDraft) => string }
+type NewBookPageProps = { onCreate: (draft: BookDraft) => Promise<string> }
 
 export function NewBookPage({ onCreate }: NewBookPageProps) {
   const navigate = useNavigate()
@@ -17,8 +17,8 @@ export function NewBookPage({ onCreate }: NewBookPageProps) {
       <Link to="/books">← К списку книг</Link>
       <h1>Добавить книгу</h1>
       <p className="page-intro">В каждой книге — новая история. Сохраните ту, которую хочется прочитать.</p>
-      <BookForm initialValues={emptyBook} onSave={(draft) => {
-        const id = onCreate(draft)
+      <BookForm initialValues={emptyBook} onSave={async (draft) => {
+        const id = await onCreate(draft)
         navigate(`/books/${id}`)
       }} onCancel={() => navigate('/books')} />
     </section>

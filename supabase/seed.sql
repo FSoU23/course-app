@@ -5,6 +5,6 @@ insert into public.genres (id, name) values
   ('fantasy', 'Фэнтези'),
   ('detective', 'Детектив'),
   ('nonfiction', 'Познавательная проза'),
-  ('novel', 'Роман'),
+  ('novel', 'Роман в прозе'),
   ('poetry', 'Поэзия')
 on conflict (id) do update set name = excluded.name;
